@@ -34,8 +34,10 @@ int main(int argc, const char * argv[]) {
         		// Estamos en el hijo
 			printf("Comienza el proceso hijo con PID = %d y su padre es PPID = %d \n", \
                 		getpid(), getppid());
-		
-			sleep(rand() % T);	
+	
+			srand((int) time(NULL)^(getpid()<<1));	
+			sleep(rand() % T);
+			free(ids);	
 			return 0;
     		}
 
