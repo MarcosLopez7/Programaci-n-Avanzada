@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #define N 100
 
-void leer(int fd);
-void escribir(int fd, int *);
+int suma(int *);
 
 int main(int argc, const char * argv[])
 {
@@ -26,17 +26,18 @@ int main(int argc, const char * argv[])
     	{
         	/* Hijo */
         	close(tuberia[1]);
-        
-        	printf(" Soy el hijo y estoy leyendo ... \n");
-        
-        	leer(tuberia[0]);
+		int *nums = (int *) malloc(N * sizeof(int));
+       
+        	read(tuberia[0], nums, N * sizeof(int));
+		printf("El resultado es: %d\n", suma(nums));
+		free(nums);
     	}
     	else {
         	/* Padre */
         
         	close(tuberia[0]);
         
-        	printf(" Soy el padre y estoy escribiendo ... \n");
+        	printf("Escribe numeros a sumar, para salir le das 0\n");
        	
 		int n;
 		int *np = numeros;
@@ -48,7 +49,7 @@ int main(int argc, const char * argv[])
 
 		} while(n != 0);
  
-        	escribir(tuberia[1], numeros);
+        	write(tuberia[1], numeros, N * sizeof(int));
     	}
  
 	free(numeros);
@@ -56,38 +57,17 @@ int main(int argc, const char * argv[])
     	return 0;
 }
 
-void leer(int fd)
-{
-    	FILE * file;
-    	int c;
-    	int res = 0;
+int suma(int *v){
 
-    	file = fdopen(fd, "r");
-    
-    	while ( (c = fgetc(file)) != EOF )
-    	{
-		c -= '0';
-		res += c;
-    	}
+	int res = 0;
+		
+	int *vP = v;
 
-	printf("Res es: %d\n", res);
-    
-    	fclose(file);
+	while(*vP != 0){
+		res += *vP;
+		vP++;
+	}	
+
+	return res;
+
 }
-
-void escribir(int fd, int *nums)
-{
-    	FILE * file;
-    	file = fdopen(fd, "w");
-
-    	int *n = nums;
-    	while (*n != 0) {
-        	fprintf(file, "%d", *n);
-		n++;
-    	}
-
-	fprintf(file, "\n");
-    
-    	fclose(file);
-}
-
