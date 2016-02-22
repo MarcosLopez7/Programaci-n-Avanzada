@@ -14,10 +14,11 @@ int main(int argc, const char *argv[]){
 	int *pP = pipes;
 
 	for(i = 0; i < n * 2; ++i){
-		int temp[2];
-		temp[0] = *pP;
+		int *temp;
+		temp = pP;
 		pP++;
-		temp[1] = *pP;
+		temp++;
+		temp = pP;
 		pipe(temp);
 		pP++;	
 	}
@@ -51,7 +52,7 @@ int main(int argc, const char *argv[]){
 			pP++;
 			
 			printf("%d\n", i);	
-                	write(*pP, &i, sizeof(int));
+                	write(*pP, getpid(), sizeof(int));
 
 			free(pipes);
 			exit(0);
