@@ -21,6 +21,11 @@ int main(){
 
 	struct sigaction handler; 
 	
+	sigset_t mascara, pendiente;
+	sigfillset(&mascara);
+	sigdelset(&mascara, SIGALRM);
+	sigprocmask(SIG_SETMASK, &mascara, NULL);
+
 	signal(SIGALRM, SIG_DFL);
 	
 	alarm(2);
@@ -39,6 +44,7 @@ int main(){
 	for(i = 0; i < N; ++i){
 		sprintf(d, "datos/a%d", i);
 		grabar = 1;
+		int signal;
 	
 		file = fopen(d, "w+");
 
@@ -50,6 +56,13 @@ int main(){
 
 		while(grabar)
 			fputc('x', file);
+	
+		sigpending(&pendiente);
+      	for(signal = 1; signal < NSIG; ++signal) {
+          	if(sigismember(&pendiente, signal)) {
+              	fprintf(file, "La señal %d, fue bloqueada\n", signal);
+          	}
+      	}
 	
 		fclose(file);	
 	}
