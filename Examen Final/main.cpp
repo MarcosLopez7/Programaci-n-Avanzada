@@ -49,9 +49,6 @@ int main() {
         }
     }
 
-    if (signal(SIGUSR1,handler) == SIG_ERR)
-        printf("La senal no sirve\n");
-
     pthread_t centro;
 
     pthread_create(&centro, NULL, central, (void *)arreglo);
@@ -67,7 +64,7 @@ void *central(void *a){
     int *arreglo = (int *) a;
     int i, j, k;
 
-    pthread_t procesos[PROCESADORES];
+    pthread_t procesos[N/PROCESADORES];
 
     for (i = 0; i < N; i += PROCESADORES) {
         int *temp = (int *) malloc(PROCESADORES * PROCESADORES * sizeof(int));
@@ -79,12 +76,12 @@ void *central(void *a){
                 l++;
             }
         }
-        pthread_create(&procesos[i / 10], NULL, procesar, (void *)temp);
+        pthread_create(&procesos[i / PROCESADORES], NULL, procesar, (void *)temp);
     }
 
 
-    for (i = 0; i < PROCESADORES; ++i) {
-        pthread_join(procesos[i], NULL);
+    for (i = 0; i < N; i += PROCESADORES) {
+        pthread_join(procesos[i / PROCESADORES], NULL);
     }
 
     pthread_exit(NULL);
@@ -107,23 +104,33 @@ void *procesar(void *m){
 
     int pasos = soluciona(0, 0, 0, miniTabla);
 
-    printf("Numero de pasos ejecutados en este thread %d", pasos);
+    printf("Numero de pasos ejecutados en este thread %d\n", pasos);
 
     free(miniTabla);
     pthread_exit(NULL);
 }
 
-int soluciona(int i, int j, int pasos, int**){
+int soluciona(int i, int j, int pasos, int **m){
 
     if ((i + 1) == PROCESADORES && (j + 1) == PROCESADORES){
-        return pasos;
-    } else if() {
-
+        return pasos + 1;
+    } else if((i + 1) < PROCESADORES && (j + 1) < PROCESADORES && m[i + 1][j + 1] == 0) {
+        if (signal(SIGUSR1,handler) == SIG_ERR)
+            printf("La senal no sirve\n");
+        soluciona(i + 1, j + 1, pasos + 1, m);
+    } else if ((i + 1) < PROCESADORES && (j + 1) < PROCESADORES && m[i + 1][j] == 0){
+        soluciona(i + 1, j + 1, pasos + 2, m);
+    } else if ((i + 1) < PROCESADORES && (j + 1) < PROCESADORES && m[i][j + 1] == 0){
+        soluciona(i, j + 1, pasos + 1, m);
+    } else if((i + 1) < PROCESADORES && (j + 1) < PROCESADORES && m[i - 1][j] == 0){
+        soluciona((i + 1) < PROCESADORES && (j + 1) < PROCESADORES && i - 1, j, pasos + 1, m);
+    } else if((i + 1) < PROCESADORES && (j + 1) < PROCESADORES && m[i - 1][j + 1] == 0){
+        soluciona(i - 1, j + 1, pasos + 1, m);
     }
 
 }
 
 void handler(int sen) {
-    printf("SIGUSR1\n");
+    printf("llevamos %d \n", sen);
     sleep(2);
 }
