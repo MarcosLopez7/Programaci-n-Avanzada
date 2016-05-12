@@ -49,6 +49,9 @@ int main() {
         }
     }
 
+    if (signal(SIGUSR1,handler) == SIG_ERR)
+        printf("La senal no sirve\n");
+
     pthread_t centro;
 
     pthread_create(&centro, NULL, central, (void *)arreglo);
@@ -103,7 +106,7 @@ void *procesar(void *m){
     }
 
     int pasos = soluciona(0, 0, 0, miniTabla);
-
+    kill(getpid(), SIGUSR1);
     printf("Numero de pasos ejecutados en este thread %d\n", pasos);
 
     free(miniTabla);
@@ -115,8 +118,6 @@ int soluciona(int i, int j, int pasos, int **m){
     if ((i + 1) == PROCESADORES && (j + 1) == PROCESADORES){
         return pasos + 1;
     } else if((i + 1) < PROCESADORES && (j + 1) < PROCESADORES && m[i + 1][j + 1] == 0) {
-        if (signal(SIGUSR1,handler) == SIG_ERR)
-            printf("La senal no sirve\n");
         soluciona(i + 1, j + 1, pasos + 1, m);
     } else if ((i + 1) < PROCESADORES && (j + 1) < PROCESADORES && m[i + 1][j] == 0){
         soluciona(i + 1, j + 1, pasos + 2, m);
@@ -131,6 +132,6 @@ int soluciona(int i, int j, int pasos, int **m){
 }
 
 void handler(int sen) {
-    printf("llevamos %d \n", sen);
+    printf("llevamos %d pasos\n", 4);
     sleep(2);
 }
